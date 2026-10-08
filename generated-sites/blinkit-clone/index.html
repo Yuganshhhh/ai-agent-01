@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <metater charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blinkit - Grocery in 10 minutes | Quick Delivery Clone</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Top Delivery Header -->
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="logo-delivery">
+                <a href="#" class="brand-logo">
+                    <h1>blink<span class="yellow">it</span></h1>
+                </a>
+                <div class="delivery-location">
+                    <span class="delivery-title">Delivery in 9 minutes</span>
+                    <div class="location-select">
+                        <strong>B-12, Connaught Place</strong> <i class="fa-solid fa-angle-down"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="searchInput" placeholder="Search 'milk', 'bread', 'chips', 'atta'...">
+                <button class="clear-search" id="clearSearch" style="display: none;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="nav-actions">
+                <button class="btn-login" id="loginBtn">Login</button>
+                <button class="btn-cart" id="cartBtn">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span id="cartCount">0</span> items
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Hero Banner Slider -->
+        <section class="hero-banners">
+            <div class="banner-track">
+                <div class="banner-card b1">
+                    <div class="banner-text">
+                        <span class="badge">PAAN CORNER</span>
+                        <h2>Fresh Paan & Mouth Fresheners</h2>
+                        <p>Delivered in 10 minutes</p>
+                        <button class="banner-btn" onclick="filterCategory('snacks')">Order Now</button>
+                    </div>
+                </div>
+                <div class="banner-card b2">
+                    <div class="banner-text">
+                        <span class="badge">SUPER SAVER</span>
+                        <h2>Up to 40% OFF on Dairy & Breakfast</h2>
+                        <p>Milk, Butter, Bread, Eggs & more</p>
+                        <button class="banner-btn" onclick="filterCategory('dairy')">Explore</button>
+                    </div>
+                </div>
+                <div class="banner-card b3">
+                    <div class="banner-text">
+                        <span class="badge">MEDICINES & ESSENTIALS</span>
+                        <h2>Healthcare at your doorstep</h2>
+                        <p>Fast delivery 24/7</p>
+                        <button class="banner-btn" onclick="filterCategory('medicines')">Shop Now</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Category Icons Grid -->
+        <section class="categories-section">
+            <div class="container">
+                <h3 class="section-title">Shop by Category</h3>
+                <div class="category-grid" id="categoryGrid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Products Section -->
+        <section class="products-section">
+            <div class="container">
+                <div class="section-header">
+                    <h3 class="section-title" id="activeCategoryTitle">Dairy, Bread & Eggs</h3>
+                    <div class="category-filters">
+                        <button class="cat-chip active" onclick="filterCategory('all')">All Products</button>
+                        <button class="cat-chip" onclick="filterCategory('dairy')">Dairy & Breakfast</button>
+                        <button class="cat-chip" onclick="filterCategory('vegetables')">Fruits & Veg</button>
+                        <button class="cat-chip" onclick="filterCategory('snacks')">Munchies</button>
+                        <button class="cat-chip" onclick="filterCategory('beverages')">Cold Drinks</button>
+                        <button class="cat-chip" onclick="filterCategory('instant')">Instant Food</button>
+                    </div>
+                </div>
+
+                <div class="product-grid" id="productGrid">
+                    <!-- Products populated by JS -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Cart Drawer / Sidebar -->
+    <div class="cart-overlay" id="cartOverlay"></div>
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="cart-header">
+            <h3>My Cart</h3>
+            <button class="close-cart" id="closeCart"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <div class="delivery-time-box">
+            <i class="fa-solid fa-stopwatch"></i>
+            <div>
+                <strong>Delivery in 9 minutes</strong>
+                <p>Shipment 1 of 1 (<span id="cartDrawerCount">0</span> items)</p>
+            </div>
+        </div>
+
+        <div class="cart-items-list" id="cartItemsList">
+            <!-- Cart items populated by JS -->
+            <div class="empty-cart-state" id="emptyCartState">
+                <img src="https://cdn.iconscout.com/icon/free/png-256/free-empty-cart-4152512-3435656.png" alt="Empty Cart">
+                <h4>Your cart is empty</h4>
+                <p>Add items to your cart to enjoy lightning fast delivery</p>
+            </div>
+        </div>
+
+        <div class="bill-details" id="billDetails" style="display: none;">
+            <h4>Bill Details</h4>
+            <div class="bill-row">
+                <span>Items total</span>
+                <span id="billItemsTotal">₹0</span>
+            </div>
+            <div class="bill-row">
+                <span>Delivery charge</span>
+                <span class="free-badge">FREE</span>
+            </div>
+            <div class="bill-row">
+                <span>Handling charge</span>
+                <span>₹4</span>
+            </div>
+            <div class="bill-row total-row">
+                <span>Grand Total</span>
+                <span id="billGrandTotal">₹0</span>
+            </div>
+        </div>
+
+        <div class="cart-footer" id="cartFooter" style="display: none;">
+            <div class="total-info">
+                <span id="footerTotalItems">0 items</span>
+                <strong id="footerTotalPrice">₹0</strong>
+            </div>
+            <button class="btn-checkout" id="checkoutBtn">
+                <span>Proceed to Checkout</span>
+                <i class="fa-solid fa-angle-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-box">
+            <button class="close-modal" id="closeModal"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-header">
+                <h2>blink<span class="yellow">it</span></h2>
+                <p>India's last minute app</p>
+            </div>
+            <div class="modal-body">
+                <h3>Enter your mobile number</h3>
+                <div class="phone-input-box">
+                    <span>+91</span>
+                    <input type="tel" id="phoneNumber" placeholder="Enter mobile number" maxlength="10">
+                </div>
+                <button class="btn-continue" id="continueBtn">Continue</button>
+                <p class="terms">By continuing, you agree to our Terms of Use & Privacy Policy</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Success Toast -->
+    <div class="toast" id="toast">
+        <i class="fa-solid fa-circle-check"></i>
+        <div class="toast-content">
+            <strong id="toastTitle">Order Placed Successfully!</strong>
+            <p id="toastMsg">Your order is on the way in 9 minutes.</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

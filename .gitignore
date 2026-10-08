@@ -1,0 +1,46 @@
+# Secrets & local config
+.env
+.env.*
+!.env.example
+src/main/resources/application-local.properties
+src/main/resources/application-*.properties
+!src/main/resources/application.properties
+
+# Build
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# IDE
+.idea/
+*.iws
+*.iml
+*.ipr
+.classpath
+.project
+.settings/
+.vscode/
+*.swp
+*.swo
+.springBeans
+.sts4-cache
+.apt_generated
+.factorypath
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
