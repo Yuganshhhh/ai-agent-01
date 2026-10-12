@@ -12,12 +12,37 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Service that runs the autonomous website generation agent.
+ * <p>
+ * The model receives a detailed system prompt and the {@link FileTools}. From a
+ * plain-text description such as "build a portfolio site", it plans the site,
+ * creates a folder, writes {@code index.html}, {@code style.css} and
+ * {@code script.js}, reads them back to verify them, and fixes any problems.
+ * The generated files are saved in the {@code generated-sites} folder.
+ * <p>
+ * Conversation history is kept in memory so follow-up requests such as
+ * "make the header blue" modify the existing site instead of starting over.
+ */
 @Service
 public class GenerateWebsiteService {
 
+    /** Spring AI client used to talk to the model. */
     private final ChatClient chatClient;
+
+    /** File tools the agent uses to create, read and list files. */
     private final FileTools fileTools;
+
+    /** In-memory conversation history, so follow-up requests have context. */
     private final List<Message> messages = new ArrayList<>();
+
+    /**
+     * System prompt that defines the agent. It contains:
+     * the role, the tools available, the step-by-step workflow,
+     * quality rules (plain HTML/CSS/JS only, responsive, semantic HTML),
+     * safety boundaries (workspace only, no prompt leaking),
+     * how to handle follow-up requests, and how to finish.
+     */
     private static final String SYSTEM_PROMPT = """
             # ROLE
                 You are an expert front-end web developer working as an autonomous agent.
@@ -82,15 +107,31 @@ public class GenerateWebsiteService {
                 plain sentences: the project folder name, the files created.
             """;
 
+    /**
+     * Creates the service.
+     *
+     * @param builder   Spring AI builder used to create the {@link ChatClient}
+     * @param fileTools the file tools the agent is allowed to use
+     */
     public GenerateWebsiteService(ChatClient.Builder builder, FileTools fileTools) {
         this.chatClient = builder.build();
         this.fileTools = fileTools;
     }
 
+    /**
+     * Asks the agent to build or modify a website.
+     * <p>
+     * The call is blocking: it returns only after the model has finished all of
+     * its tool calls (creating, writing, reading and verifying files).
+     *
+     * @param messageDto the user's description of the website or the change wanted
+     * @return the agent's short final summary (folder name and files created)
+     */
     public String generateWebsite(MessageDto messageDto) {
 
         messages.add(new UserMessage(messageDto.getMessage()));
 
+        // The model may call FileTools many times before it returns the final text
         String output = chatClient.prompt()
                 .messages(messages)
                 .tools(fileTools)
@@ -98,6 +139,7 @@ public class GenerateWebsiteService {
                 .call()
                 .content();
 
+        // Save the reply so follow-up requests have context
         messages.add(new AssistantMessage(output));
 
         return output;
