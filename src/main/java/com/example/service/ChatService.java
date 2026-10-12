@@ -15,11 +15,27 @@ import reactor.core.publisher.Flux;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Service behind the streaming chat endpoint.
+ * <p>
+ * Sends the user's message to the AI model together with the earlier
+ * conversation, and gives the model three tools it may call:
+ * calculator, weather and currency exchange. The reply is streamed back
+ * token by token.
+ * <p>
+ * Note: the conversation history is kept in memory in a single list, so it is
+ * shared by all callers and is cleared when the application restarts.
+ */
 @Service
 public class ChatService {
 
+    /** Spring AI client used to talk to the model. */
     private final ChatClient chatClient;
+
+    /** In-memory conversation history (user and assistant messages). */
     private final List<Message> messageList = new ArrayList<Message>();
+
+    /** System prompt that sets the behaviour and tone of the assistant. */
     private static final String SYSTEM_PROMPT = """
             Explain every philosophical theory in a deep/ human way.
             """;
@@ -28,6 +44,14 @@ public class ChatService {
     private final WeatherTool weatherTool;
     private final CurrencyExchangeTool currencyExchangeTool;
 
+    /**
+     * Creates the service and registers the tools the model can use.
+     *
+     * @param builder              Spring AI builder used to create the {@link ChatClient}
+     * @param calculatorTool       tool for arithmetic
+     * @param weatherTool          tool for current weather
+     * @param currencyExchangeTool tool for exchange rates
+     */
     @Autowired
     public ChatService(ChatClient.Builder builder,
                        CalculatorTool calculatorTool,
@@ -39,8 +63,20 @@ public class ChatService {
         this.currencyExchangeTool = currencyExchangeTool;
     }
 
+    /**
+     * Sends a message to the AI and streams the reply.
+     * <p>
+     * The user's message is added to the history first. While the reply
+     * streams in, each chunk is collected, and when streaming finishes the
+     * full reply is saved to the history as an assistant message, so the model
+     * remembers it in the next request.
+     *
+     * @param message the user's message
+     * @return a stream of text chunks from the model
+     */
     public Flux<String> chat(MessageDto message) {
 
+        // Collects the streamed chunks so the full reply can be saved at the end
         StringBuilder sb = new StringBuilder();
 
         messageList.add(new UserMessage(message.getMessage()));
@@ -54,13 +90,15 @@ public class ChatService {
                 .content()
                 .doOnNext(sb::append)
                 .doOnComplete(() -> {
+                    // Save the complete reply to the conversation history
                     messageList.add(new AssistantMessage(sb.toString()));
                 });
     }
 }
 
 
-//Prompt which i have used:
+// Example of a tool-aware system prompt that was used while testing the tools.
+// Prompt which i have used:
 
 //You are a helpful AI assistant with access to external tools.
 //
